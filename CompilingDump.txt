@@ -1,0 +1,14 @@
+Menu .o creation:
+    cd Menu/
+    gcc -o menu.o -c menu.c
+
+CoreGame .o creation
+    cd CoreGame/
+    gcc -o game.o -c game.c
+
+Main app creation 
+    gcc main.c CoreGame/game.o Menu/menu.o -o Battleship.exe
+
+Important
+    Everytime you change something on the CoreGame or Menu files (.h,.c)
+    you have to compile again and create a new .o file Just the one youve modified
