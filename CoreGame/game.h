@@ -17,6 +17,7 @@ typedef struct ship
     char orientation;
     // Sunk - not sunk
     short sunk;
+    int ID;
 }ship;
 
 
@@ -25,3 +26,4 @@ void gameInit(int *userX, int *userY, short *game_mode);
 void boardInt(char (*board)[], int *x, int *y);
 
 void drawBoard(char (*board)[], int *x, int *y);
+
