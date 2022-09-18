@@ -69,7 +69,6 @@ void gameInit(int *userX, int *userY, short *game_mode)
 
         int total_pertype[5], total_ships=0;
         shipsInit(board, CB, userX, userY, total_pertype);
-        
         total_ships=*(total_pertype) + *(total_pertype+1) + *(total_pertype+2) + *(total_pertype+3) + *(total_pertype+4);
         
         ship usr_ships[total_ships];
