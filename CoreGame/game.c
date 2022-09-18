@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
+#include <Windows.h>
 
 
 // Global vars for the board size
 int Rows=10;
 int Columns=10;
+int types_sizes[5]={5,4,3,2,1};
+char types_names[5]={'A','V','S','C','B'};
 
 // Porcentage of ships ocupation in the board
 #define defaultSO 30
@@ -24,7 +28,7 @@ typedef struct cell{
 
 typedef struct ship{
     // Aircraft carrier (AC), Vessel (VS), Submarine(SM), Cruise (CR), Boat (BT)
-    char ship_type[3];
+    char ship_type;
     // Vertical or Hirizontal
     char orientation;
     // Sunk - not sunk
@@ -43,7 +47,7 @@ void shipsInit(char (*)[Columns], cell (*)[], int *, int *, int *);
 
 void gameLoop(char (*)[Columns], char (*)[Columns] , int *, int *);
 
-void register_ships(int *, cell (*)[], ship []);
+void register_ships(int *, cell (*)[], ship *, char (*)[Columns]);
 
 int total_amount_ships(int *, int *);
 
@@ -51,6 +55,8 @@ void initialice_cells_list(cell (*CB)[Columns]);
 void initialize_ships_list(ship *ships, int *);
 
 void total_per_type(int *amt_ships, int *ships_size, int *total_pertype);
+
+void print_ships(ship *ships, int *len);
 
 void gameInit(int *userX, int *userY, short *game_mode)
 {
@@ -72,9 +78,13 @@ void gameInit(int *userX, int *userY, short *game_mode)
         total_ships=*(total_pertype) + *(total_pertype+1) + *(total_pertype+2) + *(total_pertype+3) + *(total_pertype+4);
         
         ship usr_ships[total_ships];
-        initialize_ships_list(usr_ships, &total_ships);
         printf("Total ships: %d \n", total_ships);
+        initialize_ships_list(usr_ships, &total_ships);
+        register_ships(total_pertype, CB, usr_ships, board);
 
+
+        print_ships(usr_ships, &total_ships);
+        drawBoard(board, userX, userY);
         // PC board
 
     }
@@ -96,8 +106,12 @@ void gameInit(int *userX, int *userY, short *game_mode)
         int total_ships=*(total_pertype) + *(total_pertype+1) + *(total_pertype+2) + *(total_pertype+3) + *(total_pertype+4);
 
         ship usr_ships[total_ships];
-        initialize_ships_list(usr_ships, &total_ships);
         printf("Total ships: %d \n", total_ships);
+        initialize_ships_list(usr_ships, &total_ships);
+        register_ships(total_pertype, CB, usr_ships, board);
+
+        print_ships(usr_ships, &total_ships);
+        drawBoard(board, userX, userY);
         // PC BOARD
     }
 }
@@ -140,7 +154,6 @@ void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *x, int *y , in
     // Ships have fixed sizes and the random number could leave some unused cells
     int fixed_cells=0;
     int restantcells=0;
-    int types_sizes[5]={5,4,3,2,1};
     for(int i=0; i<5;i++)
     {
         (*(ships+i))+=restantcells;
@@ -164,24 +177,272 @@ void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *x, int *y , in
         printf("%d -- %d\n", i, *(ships+i));
     }
 
+    // TOTAL OF SHIPS PER TYPE
     total_per_type(ships, types_sizes, ships_per_type);
 }
 
 // Create ships on the board and link with cells
-void register_ships(int *amt_ships, cell (*CB)[Columns], ship ships_list[])
+void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char (*board)[Columns])
 {
+
+    // ID will create starting on 1
+    int ID_temp=1, ship_list_pos=0;
     // Cycle in every type of ship and create the amount desired
     for(int type=0; type<5; type++)
-    {
-        for(int size=5; size>0; size--){
-            while(*(amt_ships+type) !=0)
+    {   
+        printf("TYPE: %d\n", type);
+
+        while(*(amt_ships+type) !=0)
+        {
+            // Register Ship on cell and create ship ID linked with cells
+                // Random cell in the board
+            printf("Searching space for boat\n");
+            int conf_of_registry=0;
+            while(conf_of_registry==0)
             {
-                // Register Ship on cell and create ship ID linked with cells
-                    // Random cell in the board
-                int cellY = rand() %Columns, cellX= rand() %Rows;
+
+                // COORDINATES OF THE SHIP
+                int cellY = rand() %Rows, cellX= rand() %Columns;
+                while(  (*(CB+cellY)+cellX)->cell_state != 0)
+                {
+                    cellY = rand() %Rows; cellX= rand() %Columns;
+                }
+                printf("\tCells (x=%d, y=%d)\n", cellX, cellY);
+                Sleep(2);
+            
+
+                int verf_x=cellX, verf_y=cellY;
+                int direction=0;
+                int free_cells=0;
+                // Orientation
+                if(type !=4)
+                {
+                    // Vertical (Rows - Y)
+                        // Up the cell
+                    printf("  UP\n");
+                    while(  (verf_y<Rows) && (verf_y>=0) && (free_cells<(types_sizes[type]))  )
+                    {
+                        if((*(CB+verf_y)+verf_x)->cell_state == 0)
+                        {
+                            free_cells++;
+                            printf("\tcell is free (%d, %d)\n", verf_x, verf_y);
+                            if(free_cells==(types_sizes[type]))
+                            {
+                                printf("\t\tOrientation V\n");
+                                Sleep(2);
+                                direction=2;
+                                break;
+                            }
+                            verf_y--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    verf_x=cellX; verf_y=cellY; free_cells=0;
+
+                        // Down the cell
+                    if(direction==0){
+                        printf("  DOWN\n");
+                        while(  (verf_y<Rows) && (verf_y>=0) && (free_cells<(types_sizes[type]))  )
+                        {
+                            if((*(CB+verf_y)+verf_x)->cell_state == 0)
+                            {
+                                printf("\tcell is free (%d, %d)\n", verf_x, verf_y);
+                                free_cells++;
+                                if(free_cells==(types_sizes[type]))
+                                {
+                                    printf("\t\tOrientation: V\n");
+                                    Sleep(2);
+                                    direction=-2;
+                                    break;
+                                }
+                                verf_y++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        verf_x=cellX; verf_y=cellY; free_cells=0;
+                    }
+
+                    // Horizontal (Columns - X)
+                        // Left
+                    if(direction==0){
+                        printf("  Left\n");
+                        while(  (verf_x<Columns) && (verf_x>=0) && (free_cells<(types_sizes[type]))  )
+                        {
+                            if((*(CB+verf_y)+verf_x)->cell_state == 0)
+                            {
+                                printf("\tcell is free (%d, %d)\n", verf_x, verf_y);
+                                free_cells++;
+                                if(free_cells==(types_sizes[type]))
+                                {
+                                    printf("\t\tOrientation H\n");
+                                    Sleep(2);
+                                    direction=-1;
+                                    break;
+                                }
+                                verf_x--;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        verf_x=cellX; verf_y=cellY; free_cells=0;
+                    }
+
+                        // Right
+                    if(direction==0){
+                        printf("  RIGHT\n" );
+                        while(  (verf_x<Columns) && (verf_x>=0) && (free_cells<(types_sizes[type]))  )
+                        {
+                            if((*(CB+verf_y)+verf_x)->cell_state == 0)
+                            {
+                                printf("\tcell is free (%d, %d)\n", verf_x, verf_y);
+                                free_cells++;
+                                if(free_cells==(types_sizes[type]))
+                                {
+                                    direction=1;
+                                    printf("\t\tOrientation H\n");
+                                    Sleep(2);
+                                    break;
+                                }
+                                verf_x++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        verf_x=cellX; verf_y=cellY; free_cells=0;
+                    }
+
+                    if(direction != 0)
+                    {
+                        if(direction==2)
+                        {
+                            (ships_list+ship_list_pos)->ID= ID_temp;
+                            (ships_list+ship_list_pos)->sunk= 0;
+                            (ships_list+ship_list_pos)->orientation='V';
+                            (ships_list+ship_list_pos)->ship_type=*(types_names+type);
+                            
+
+                            for(int i=0; i< (*(types_sizes+type)); i++){
+                                (*(CB+verf_y)+verf_x)->cell_state=1;
+                                (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
+                                *(*(board+verf_y)+verf_x)=*(types_names+type);
+                                verf_y--;
+                            }
+                            ID_temp++;
+                            printf("\tBarcos antes: %d\n", *(amt_ships+type));
+                            (*(amt_ships+type))--;
+                            conf_of_registry=1;
+                            printf("\tBarco registrado: %d\n ", (ships_list+ship_list_pos)->ID);
+                            printf("\tBarcos restantes: %d\n", *(amt_ships+type));
+                            ship_list_pos++;
+
+                        }
+
+                        else if(direction==-2)
+                        {
+                            (ships_list+ship_list_pos)->ID= ID_temp;
+                            (ships_list+ship_list_pos)->sunk= 0;
+                            (ships_list+ship_list_pos)->orientation='V';
+                            (ships_list+ship_list_pos)->ship_type=*(types_names+type);
+
+                            for(int i=0; i< (*(types_sizes+type)); i++){
+                                (*(CB+verf_y)+verf_x)->cell_state=1;
+                                (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
+                                *(*(board+verf_y)+verf_x)=*(types_names+type);
+                                verf_y++;
+                            }
+                            ID_temp++;
+                            printf("\tBarcos antes: %d\n", *(amt_ships+type));
+                            (*(amt_ships+type))--;
+                            conf_of_registry=1;
+                            printf("\tBarco registrado: %d\n ", (ships_list+ship_list_pos)->ID);
+                            printf("\tBarcos restantes: %d\n", *(amt_ships+type));
+                            ship_list_pos++;
+                        }
+
+                        else if(direction==-1)
+                        {
+                            (ships_list+ship_list_pos)->ID= ID_temp;
+                            (ships_list+ship_list_pos)->sunk= 0;
+                            (ships_list+ship_list_pos)->orientation='H';
+                            (ships_list+ship_list_pos)->ship_type=*(types_names+type);
+
+                            for(int i=0; i< (*(types_sizes+type)); i++){
+                                (*(CB+verf_y)+verf_x)->cell_state=1;
+                                (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
+                                *(*(board+verf_y)+verf_x)=*(types_names+type);
+                                verf_x--;
+                            }
+                            ID_temp++;
+                            printf("\tBarcos antes: %d\n", *(amt_ships+type));
+                            (*(amt_ships+type))--;
+                            conf_of_registry=1;
+                            printf("\tBarco registrado: %d\n ", (ships_list+ship_list_pos)->ID);
+                            printf("\tBarcos restantes: %d\n", *(amt_ships+type));
+                            ship_list_pos++;
+                        }
+                        else if(direction==1)
+                        {
+                            (ships_list+ship_list_pos)->ID= ID_temp;
+                            (ships_list+ship_list_pos)->sunk= 0;
+                            (ships_list+ship_list_pos)->orientation='H';
+                            (ships_list+ship_list_pos)->ship_type=*(types_names+type);
+
+                            for(int i=0; i< (*(types_sizes+type)); i++){
+                                (*(CB+verf_y)+verf_x)->cell_state=1;
+                                (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
+                                *(*(board+verf_y)+verf_x)=*(types_names+type);
+                                verf_x++;
+                            }
+                            ID_temp++;
+                            printf("\tBarcos antes: %d\n", *(amt_ships+type));
+                            (*(amt_ships+type))--;
+                            conf_of_registry=1;
+                            printf("\tBarco registrado: %d\n ", (ships_list+ship_list_pos)->ID);
+                            printf("\tBarcos restantes: %d\n", *(amt_ships+type));
+                            ship_list_pos++;
+
+                        }
+                    }
 
 
+                    
+                }
+                else
+                {
+                    (ships_list+ship_list_pos)->ID= ID_temp;
+                    (ships_list+ship_list_pos)->sunk= 0;
+                    (ships_list+ship_list_pos)->orientation='B';
+                    (ships_list+ship_list_pos)->ship_type=*(types_names+type);
+
+                    (*(CB+verf_y)+verf_x)->cell_state=1;
+                    (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
+
+                    *(*(board+verf_y)+verf_x)='B';
+                        
+                    ID_temp++;
+                    printf("\tBarcos antes: %d\n", *(amt_ships+type));
+                    (*(amt_ships+type))--;
+                    conf_of_registry=1;
+                    printf("\tBarco registrado: %d\n ", (ships_list+ship_list_pos)->ID);
+                    printf("\tBarcos restantes: %d\n", *(amt_ships+type));
+                    ship_list_pos++;
+                }
             }
+
+
+            
+
+
         }
     }
 }
@@ -248,11 +509,6 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
 
 }
 
-void gameLoop(char (*plyr_B)[Columns], char (*IA)[Columns] , int *x, int *y)
-{
-
-}
-
 void initialice_cells_list(cell (*CB)[Columns])
 {
     for(int rows=0; rows<Rows; rows++)
@@ -273,5 +529,34 @@ void initialize_ships_list(ship *ships, int *len)
         (ships+i)->ID = 0;
         (ships+i)->sunk=0;
         (ships+i)->orientation='0';
+    }
+}
+
+void gameLoop(char (*plyr_B)[Columns], char (*IA)[Columns] , int *x, int *y)
+{
+
+}
+
+void print_ships(ship *ships, int *len)
+{
+    for(int i=0; i< *len; i++)
+    {
+        printf("ID : %d\n", (ships+i)->ID);
+        printf("\tOrientation : %c\n", (ships+i)->orientation);
+        printf("\tSunk : %d\n", (ships+i)->sunk);
+        printf("\tType : %c\n", (ships+i)->ship_type);
+    }
+}
+
+void print_cells(cell (*cells)[Columns])
+{
+    for(int row=0; row<Rows; row++)
+    {
+        for(int colm=0; colm<Columns; colm++)
+        {
+            printf("Cell: (%d, %d)\n", colm, row);
+            printf("\tCell state: %d\n", (*(cells+row)+colm)->cell_state);
+            printf("\tCell ship ID: %d\n", (*(cells+row)+colm)->ship_id);
+        }
     }
 }
