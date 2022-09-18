@@ -29,7 +29,7 @@ typedef struct cell{
 typedef struct ship{
     // Aircraft carrier (AC), Vessel (VS), Submarine(SM), Cruise (CR), Boat (BT)
     char ship_type;
-    // Vertical or Hirizontal
+    // Vertical or Horizontal
     char orientation;
     // Sunk - not sunk
     short sunk;
