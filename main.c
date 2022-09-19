@@ -9,7 +9,7 @@
 int main(void)
 {
     // Test variables 
-    int x=7, y=7; 
+    int x=10, y=10; 
     short gamemode=0;
     // Menu needs functionality 
     // menu();

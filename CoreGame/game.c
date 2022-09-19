@@ -108,6 +108,10 @@ void gameInit(int *userX, int *userY, short *game_mode)
     register_ships(total_pertype_pc, CB_pc, pc_ships, board_pc);
 
     drawBoard(board_pc, &Columns, &Rows);
+
+    //Impresion de tableros acorde al modo de juego: 
+    //Lo hacemos en esta funcion o en gameloop?
+
 }
 
 // Fill trash data with ' ' space character
@@ -202,11 +206,14 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
             // Register Ship on cell and create ship ID linked with cells
                 // Random cell in the board
             //printf("Searching space for boat\n");
+
+            //Funcionaria con un do-while
             int conf_of_registry=0;
             while(conf_of_registry==0)
             {
 
                 // COORDINATES OF THE SHIP
+                // Ubicacion aleatoria del barco -> Confirmacion de coordenadas
                 int cellY = rand() %Rows, cellX= rand() %Columns;
                 while(  (*(CB+cellY)+cellX)->cell_state != 0)
                 {
@@ -222,6 +229,7 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                 if(type !=4)
                 {
 
+                    //Decidir si la posicion del barco sera H o V
                     int vertical=0, horizontal=0;
                     vertical= rand()%11;
                     horizontal= rand()%11;
@@ -450,11 +458,6 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                     ship_list_pos++;
                 }
             }
-
-
-            
-
-
         }
     }
 }
@@ -481,6 +484,7 @@ void total_per_type(int *amt_ships, int *ships_size, int *total_pertype)
 
 void drawBoard(char (*board)[Columns], int *x, int *y)
 {
+    //¿Que son estos structs?
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
     WORD saved_attributes;
@@ -585,6 +589,8 @@ void gameLoop(char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns
     
 }
 
+
+// Funciones para verificar el contenido de cada una de las estructuras
 void print_ships(ship *ships, int *len)
 {
     for(int i=0; i< *len; i++)
