@@ -63,60 +63,52 @@ void print_ships(ship *ships, int *len);
 
 void gameInit(int *userX, int *userY, short *game_mode)
 {
-    if (*userX && *userY != 0)
+
+    if(*userX && *userY != 0)
     {
-        // USER BOARD
         Rows=*userY;
         Columns=*userX;
-        char board[Rows][Columns];
-        boardInt(board, userX, userY);
-        // drawBoard(board, userX, userY);
+    }
 
-        // Bidimensional array of strructs with the info of each cell
-        cell CB[Rows][Columns];
-        initialice_cells_list(CB);
+    // USER INIT
+    char board_usr[Rows][Columns];
+    boardInt(board_usr, &Columns, &Rows);
 
-        int total_pertype[5], total_ships=0;
-        shipsInit(board, CB, userX, userY, total_pertype);
-        total_ships=*(total_pertype) + *(total_pertype+1) + *(total_pertype+2) + *(total_pertype+3) + *(total_pertype+4);
+    // Bidimensional array of strructs with the info of each cell
+    cell CB_usr[Rows][Columns];
+    initialice_cells_list(CB_usr);
+
+    int total_pertype_usr[5], total_ships_usr=0;
+    shipsInit(board_usr, CB_usr, &Columns, &Rows, total_pertype_usr);
+    total_ships_usr=*(total_pertype_usr) + *(total_pertype_usr+1) + *(total_pertype_usr+2) + *(total_pertype_usr+3) + *(total_pertype_usr+4);
         
-        ship usr_ships[total_ships];
-        printf("Total ships: %d \n", total_ships);
-        initialize_ships_list(usr_ships, &total_ships);
-        register_ships(total_pertype, CB, usr_ships, board);
+    ship usr_ships[total_ships_usr];
+    // printf("Total ships: %d \n", total_ships_usr);
+    initialize_ships_list(usr_ships, &total_ships_usr);
+    register_ships(total_pertype_usr, CB_usr, usr_ships, board_usr);
 
 
-        print_ships(usr_ships, &total_ships);
-        drawBoard(board, userX, userY);
-        // PC board
+    // print_ships(usr_ships, &total_ships_usr);
+    drawBoard(board_usr, &Columns, &Rows);
 
-    }
-    else
-    {
-        // USER BOARD
-        // Default dimentions of the game board 10x10
-        char board[Rows][Columns];
-        boardInt(board, &Columns, &Rows);
-        // drawBoard(board, &Columns, &Rows);
+    // PC INIT
+    char board_pc[Rows][Columns];
+    boardInt(board_pc, &Columns, &Rows);
 
-        // Bidimensional array of strructs with the info of each cell
-        cell CB[Rows][Columns];
-        initialice_cells_list(CB);
+    // Bidimensional array of strructs with the info of each cell
+    cell CB_pc[Rows][Columns];
+    initialice_cells_list(CB_pc);
 
-        int total_pertype[5];
-        shipsInit(board,CB,&Columns, &Rows, total_pertype);
+    int total_pertype_pc[5], total_ships_pc=0;
+    shipsInit(board_pc, CB_pc, &Columns, &Rows, total_pertype_pc);
+    total_ships_pc=*(total_pertype_pc) + *(total_pertype_pc+1) + *(total_pertype_pc+2) + *(total_pertype_pc+3) + *(total_pertype_pc+4);
+    
+    ship pc_ships[total_ships_pc];
+    // printf("Total ships: %d \n", total_ships_usr);
+    initialize_ships_list(pc_ships, &total_ships_pc);
+    register_ships(total_pertype_pc, CB_pc, pc_ships, board_pc);
 
-        int total_ships=*(total_pertype) + *(total_pertype+1) + *(total_pertype+2) + *(total_pertype+3) + *(total_pertype+4);
-
-        ship usr_ships[total_ships];
-        printf("Total ships: %d \n", total_ships);
-        initialize_ships_list(usr_ships, &total_ships);
-        register_ships(total_pertype, CB, usr_ships, board);
-
-        print_ships(usr_ships, &total_ships);
-        drawBoard(board, userX, userY);
-        // PC BOARD
-    }
+    drawBoard(board_pc, &Columns, &Rows);
 }
 
 // Fill trash data with ' ' space character
@@ -172,6 +164,8 @@ void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *x, int *y , in
     {
         printf("%d -- %d\n", (5-i), *(ships_per_type+i));
     }
+
+    
     // Compensate if more than 5 percent of the cells are not assigned
     float percent5=(float)cells_for_ships * (.05), remanant=cells_for_ships-total_cells_used ;
     printf("5 percent: %f\n Restante: %f\n", percent5, remanant);
@@ -589,6 +583,8 @@ void initialize_ships_list(ship *ships, int *len)
 void gameLoop(char (*plyr_B)[Columns], char (*IA)[Columns] , int *x, int *y)
 {
 
+
+    
 }
 
 void print_ships(ship *ships, int *len)
