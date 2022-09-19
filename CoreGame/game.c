@@ -48,7 +48,7 @@ void drawBoard(char (*)[], int *, int *);
 
 void shipsInit(char (*)[Columns], cell (*)[], int *, int *, int *);
 
-void gameLoop(char (*)[Columns], char (*)[Columns] , int *, int *);
+void gameloop (char (*)[Columns],ship *, cell (*)[Columns], char (*)[Columns] , ship *, cell (*)[Columns]);
 
 void register_ships(int *, cell (*)[], ship *, char (*)[Columns]);
 
@@ -104,7 +104,6 @@ void gameInit(int *userX, int *userY, short *game_mode)
     total_ships_pc=*(total_pertype_pc) + *(total_pertype_pc+1) + *(total_pertype_pc+2) + *(total_pertype_pc+3) + *(total_pertype_pc+4);
     
     ship pc_ships[total_ships_pc];
-    // printf("Total ships: %d \n", total_ships_usr);
     initialize_ships_list(pc_ships, &total_ships_pc);
     register_ships(total_pertype_pc, CB_pc, pc_ships, board_pc);
 
@@ -580,9 +579,8 @@ void initialize_ships_list(ship *ships, int *len)
     }
 }
 
-void gameLoop(char (*plyr_B)[Columns], char (*IA)[Columns] , int *x, int *y)
+void gameLoop(char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns], char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns])
 {
-
 
     
 }
