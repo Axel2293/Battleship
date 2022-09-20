@@ -9,7 +9,12 @@
 int Rows=10;
 int Columns=10;
 int types_sizes[5]={5,4,3,2,1};
-char types_names[5]={'A','V','S','C','B'};
+char types_names[5]={'A', 'V', 'S', 'C', 'B'};
+
+/* INTENTO DE CAMBIARLO A NOMBRES COMPLETOS (No me funciono xd) revisar la struct
+char types_names[][17]={"Aircraft", "Vessel", "Submarine", "Crusie", "Boat"};
+//              name1, name2, name3, name4, name5
+// char name1[] = "Aircraft carrier", name2[] = "Vessel", name3[] = "Submarine", name4[] = "Crusie", name5[] = "Boat";*/
 
 // Porcentage of ships ocupation in the board
 #define defaultSO 30
@@ -30,6 +35,8 @@ typedef struct cell{
 }cell;
 
 typedef struct ship{
+    // char ship_type[17];      //Esto cambia "modificable"
+
     // Aircraft carrier (AC), Vessel (VS), Submarine(SM), Cruise (CR), Boat (BT)
     char ship_type;
     // Vertical or Horizontal
@@ -61,6 +68,8 @@ void total_per_type(int *amt_ships, int *ships_size, int *total_pertype);
 
 void print_ships(ship *ships, int *len);
 
+void print_cells(cell (*cells)[Columns]);
+
 void gameInit(int *userX, int *userY, short *game_mode)
 {
 
@@ -87,7 +96,7 @@ void gameInit(int *userX, int *userY, short *game_mode)
     initialize_ships_list(usr_ships, &total_ships_usr);
     register_ships(total_pertype_usr, CB_usr, usr_ships, board_usr);
 
-
+    // print_cells(CB_usr);
     // print_ships(usr_ships, &total_ships_usr);
     drawBoard(board_usr, &Columns, &Rows);
 
@@ -207,7 +216,6 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                 // Random cell in the board
             //printf("Searching space for boat\n");
 
-            //Funcionaria con un do-while
             int conf_of_registry=0;
             while(conf_of_registry==0)
             {
