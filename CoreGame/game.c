@@ -61,7 +61,7 @@ void initialize_ships_list(ship *ships, int *);
 
 void total_per_type(int *amt_ships, int *ships_size, int *total_pertype);
 
-void gameLoop(char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len);
+void gameLoop(short *, char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len);
 int verify_win(ship *, int *);
 void enter_continue();
 
@@ -111,7 +111,7 @@ void gameInit(int *userX, int *userY, short *game_mode)
     initialize_ships_list(pc_ships, &total_ships_pc);
     register_ships(total_pertype_pc, CB_pc, pc_ships, board_pc);
 
-    gameLoop(board_usr, usr_ships, CB_usr, &total_ships_usr, board_pc, pc_ships, CB_pc, &total_ships_pc);
+    gameLoop(game_mode,board_usr, usr_ships, CB_usr, &total_ships_usr, board_pc, pc_ships, CB_pc, &total_ships_pc);
 }
 
 // Fill trash data with ' ' space character
@@ -484,6 +484,9 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
     GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
     saved_attributes = consoleInfo.wAttributes;
 
+    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | white );
+    printf("  TABLERO: JUGADOR  ");
+    SetConsoleTextAttribute(hConsole, saved_attributes);
 
     // Upper char A-J guide points
     printf("\n| B-S ");
@@ -531,6 +534,12 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
             case 'B':
                 SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | white);
                 break;
+            case 'X':
+                SetConsoleTextAttribute(hConsole, BACKGROUND_RED);
+                break;
+            case 2:
+                SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE);
+                break;
             default:
                 break;
             }
@@ -549,6 +558,77 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
     }
 
 
+}
+
+void didacticBoard(char (*board)[Columns])
+{
+    // Menejo de colores de la consola
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+    WORD saved_attributes;
+
+    // Current atributes of color, etc..
+    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
+    saved_attributes = consoleInfo.wAttributes;
+
+    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | white );
+    printf("  TABLERO: COMPUTADORA  ");
+    SetConsoleTextAttribute(hConsole, saved_attributes);
+    // Upper char A-J guide points
+    printf("\n| B-S ");
+    for(int k=0; k<(Columns); k++)
+    {
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN );
+        printf("| %d ", k);
+    }
+    printf("|\n");
+
+    SetConsoleTextAttribute(hConsole, saved_attributes);
+    // InterLines
+    printf("-------");
+    for(int k=0; k<(Columns); k++)
+    {
+        printf("-----");
+    }
+    printf("\n");
+
+
+    // Move through Lines (Vertical)
+    for(int i=0; i<(Rows); i++)
+    {
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+        printf("| %d   ", i);
+        SetConsoleTextAttribute(hConsole, saved_attributes);
+        // Columns (Horizontal)
+        for(int j=0; j<(Columns); j++)
+        {
+            printf("|");
+            switch (*(*(board+i)+j))
+            {
+            case 'X':
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | white);
+                printf(" %c ", *(*(board+i)+j));
+                break;
+            case 2:
+                SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | white);
+                printf(" %c ", *(*(board+i)+j));
+                break;
+            default:
+                printf("   ");
+                break;
+            }
+           SetConsoleTextAttribute(hConsole, saved_attributes);
+        }
+        printf("|\n");
+
+        // InterLines
+        printf("-------");
+        for(int k=0; k<(Columns)-1; k++)
+        {
+            printf("-----");
+        }
+        printf("\n");
+    }
 }
 
 void initialice_cells_list(cell (*CB)[Columns])
@@ -574,155 +654,157 @@ void initialize_ships_list(ship *ships, int *len)
     }
 }
 
-void gameLoop(char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len)
+void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len)
 {
     
     int win_usr=0, win_pc=0;
-    printf("Hello");
+    short turno=rand()%2;
 
     while((win_usr && win_pc) == 0)
     {
-        //Turno del jugador
-        system("cls");
-        drawBoard(player, &Columns, &Rows);
-        drawBoard(pc, &Columns, &Rows);
 
-        int x_usr=0, y_usr=0, attack_failed=0;
-        
-        while(attack_failed == 0)
-        {
-
-            system("cls");
-            drawBoard(player, &Columns, &Rows);
-            drawBoard(pc, &Columns, &Rows);
-            printf("\nIngresa tus cordenadas para disparar x,y (separadas por coma)\n");
-            scanf("%d,%d", &x_usr, &y_usr);
-
-            // Verify if cell is occupied and mark a hit
-            if((*(pc_cells+y_usr)+x_usr)->cell_state==1)
+        if(turno==0){
+            //Turno del jugador
+            int x_usr=0, y_usr=0, attack_failed=0;
+            while((attack_failed && win_usr && win_pc) == 0)
             {
-                if((*(pc_cells+y_usr)+x_usr)->hit==0)
+
+                system("cls");
+                drawBoard(player, &Columns, &Rows);
+                if(*gamemode==1)
                 {
-                    system("cls");
-                    //Mark Cell as hit
+                    didacticBoard(pc);
+                }
+                printf("Turno: Jugador\n");
+                printf("\nIngresa tus cordenadas para disparar x,y (separadas por coma)\n");
+                scanf("%d,%d", &x_usr, &y_usr);
+
+                // Verify if cell is occupied and mark a hit
+                if((*(pc_cells+y_usr)+x_usr)->cell_state==1)
+                {
+                    if((*(pc_cells+y_usr)+x_usr)->hit==0)
+                    {
+                        system("cls");
+                        //Mark Cell as hit
+                        (*(pc_cells+y_usr)+x_usr)->hit=1;
+                        //Draw in the board the hit on the cell
+                        *(*(pc+y_usr)+x_usr)='X';
+                        //Register the hit on the boat struct
+                        int id=(*(pc_cells+y_usr)+x_usr)->ship_id;
+                        (pc_ships+(id-1))->sunk +=1;
+                        drawBoard(player, &Columns, &Rows);
+                        if(*gamemode==1)
+                        {
+                            didacticBoard(pc);
+                        }
+                        printf("Turno: Jugador\n");
+                        printf("Impacto en (%d,%d)\n", x_usr, y_usr);
+                        Sleep(4000);
+
+                    }
+                    else
+                    {
+                        printf("Turno: Jugador\n");
+                        printf("Ya atacaste esa coordenada\n");
+                        Sleep(5000);
+                    }
+                }
+                else if((*(pc_cells+y_usr)+x_usr)->cell_state==0)
+                {
+                    *(*(pc+y_usr)+x_usr)=2;
                     (*(pc_cells+y_usr)+x_usr)->hit=1;
-                    //Draw in the board the hit on the cell
-                    *(*(pc+y_usr)+x_usr)='X';
-                    //Register the hit on the boat struct
-                    int id=(*(pc_cells+y_usr)+x_usr)->ship_id;
-                    (pc_ships+(id-1))->sunk +=1;
+                    system("cls");
                     drawBoard(player, &Columns, &Rows);
-                    drawBoard(pc, &Columns, &Rows);
-                    printf("Impacto en (%d,%d)\n", x_usr, y_usr);
-                    enter_continue();
-                    getchar();
-
+                    if(*gamemode==1)
+                    {
+                        didacticBoard(pc);
+                    }
+                    printf("Turno: Jugador\n");
+                    printf("No hay enemigo en la celda seleccionada\n");
+                    turno=1;
+                    Sleep(4000);
+                    attack_failed=1;
+                    break;
                 }
-                else
+
+                //Verify if user wins
+                win_usr=verify_win(pc_ships, pc_len);
+                if(win_usr)
                 {
-                    printf("Ya atacaste esa coordenada\n");
-                    enter_continue();
+                    printf("¡¡Jugador gana!!\n");
+                    break;
                 }
             }
-            else if((*(pc_cells+y_usr)+x_usr)->cell_state==0)
-            {
-                *(*(pc+y_usr)+x_usr)=2;
-                (*(pc_cells+y_usr)+x_usr)->hit=1;
-                system("cls");
-                drawBoard(player, &Columns, &Rows);
-                drawBoard(pc, &Columns, &Rows);
-
-                printf("No hay nada en la celda atacada\n");
-                enter_continue();
-                
-                attack_failed=1;
-            }
-
-            //Verify if usr wins
-            win_usr=verify_win(pc_ships, pc_len);
-            if(win_usr)
-            {
-                break;
-            }
-
         }
-        if(win_usr)
-        {
-            printf("¡¡Jugador gana!!\n");
-            attack_failed=1;
-            break;
-        }
-
-        //Turno de PC
-        int pc_x=0, pc_y=0; 
-        attack_failed=0;
-        while(attack_failed == 0)
-        {
-            //Random cell to attack
-            pc_x=rand()%Columns; pc_y=rand()%Rows;
-            while((*(usr_cells+pc_y)+pc_x)->hit == 1)
+        else if(turno==1){
+            //Turno de PC
+            int pc_x=0, pc_y=0; 
+            int attack_failed=0;
+            while((attack_failed && win_usr && win_pc) == 0)
             {
+                //Random cell to attack
                 pc_x=rand()%Columns; pc_y=rand()%Rows;
-                printf("New values %d--%d hit? %d", pc_x, pc_y, (*(usr_cells+pc_y)+pc_x)->hit);
-            }
-            getchar();
+                while((*(usr_cells+pc_y)+pc_x)->hit == 1)
+                {
+                    pc_x=rand()%Columns; pc_y=rand()%Rows;
+                }
 
-            system("cls");
-            printf("Computadora atacará %d--%d\n", pc_x, pc_y);
-            enter_continue();
+                // Verify if cell is occupied and mark a hit
+                if((*(usr_cells+pc_y)+pc_x)->cell_state==1)
+                {
+                    if((*(usr_cells+pc_y)+pc_x)->hit==0)
+                    {
+                        system("cls");
+                        //Mark Cell as hit
+                        (*(usr_cells+pc_y)+pc_x)->hit=1;
+                        //Draw in the board the hit on the cell
+                        *(*(player+pc_y)+pc_x)='X';
+                        //Register the hit on the boat struct
+                        int id=(*(usr_cells+pc_y)+pc_x)->ship_id;
+                        (usr_ships+(id-1))->sunk +=1;
+                        drawBoard(player, &Columns, &Rows);
+                        if(*gamemode==1)
+                        {
+                            didacticBoard(pc);
+                        }
+                        printf("Turno: Computadora\n");
+                        printf("Impacto de la coputadora en (%d,%d)\n", pc_x, pc_y);
+                        Sleep(4000);
 
-            // Verify if cell is occupied and mark a hit
-            if((*(usr_cells+pc_y)+pc_x)->cell_state==1)
-            {
-                if((*(usr_cells+pc_y)+pc_x)->hit==0)
+                    }
+                    else
+                    {
+                        //printf("Ya atacaste esa coordenada\n");
+                    }
+                }
+                else if((*(usr_cells+pc_y)+pc_x)->cell_state==0)
                 {
                     system("cls");
-                    //Mark Cell as hit
+                    *(*(player+pc_y)+pc_x)=2;
                     (*(usr_cells+pc_y)+pc_x)->hit=1;
-                    //Draw in the board the hit on the cell
-                    *(*(player+pc_y)+pc_x)='X';
-                    //Register the hit on the boat struct
-                    int id=(*(usr_cells+pc_y)+pc_x)->ship_id;
-                    (usr_ships+(id-1))->sunk +=1;
                     drawBoard(player, &Columns, &Rows);
-                    drawBoard(pc, &Columns, &Rows);
-                    printf("Impacto de la coputadora en (%d,%d)\n", pc_x, pc_y);
-                    enter_continue();
+                    if(*gamemode==1)
+                    {
+                        didacticBoard(pc);
+                    }
+                    printf("Turno: Computadora\n");
+                    printf("La computadora fallo\n");
+                    Sleep(4000);
+                    turno=0;
+                    attack_failed=1;
+                    break;
 
                 }
-                else
+
+                //Verify if usr wins
+                win_pc=verify_win(usr_ships, usr_len);
+                if(win_pc)
                 {
-                    //printf("Ya atacaste esa coordenada\n");
+                    printf("¡¡Computadora gana!!\n");
+                    break;
                 }
             }
-            else if((*(usr_cells+pc_y)+pc_x)->cell_state==0)
-            {
-                system("cls");
-                *(*(player+pc_y)+pc_x)=2;
-                (*(usr_cells+pc_y)+pc_x)->hit=1;
-                drawBoard(player, &Columns, &Rows);
-                drawBoard(pc, &Columns, &Rows);
-                printf("La computadora fallo\n");
-                enter_continue();
-                attack_failed=1;
-
-            }
-
-            //Verify if usr wins
-            win_pc=verify_win(usr_ships, usr_len);
-            if(win_pc)
-            {
-                break;
-            }
-
         }
-        if(win_pc)
-        {
-            printf("¡¡Computadora gana!!\n");
-            attack_failed=1;
-            break;
-        }
-
     }
 }
 
@@ -758,7 +840,7 @@ void enter_continue()
 
 
 
-// Funciones para verificar el contenido de las estructuras
+// Funciones para verificar el contenido de las estructuras -DEV TESTING
 void print_ships(ship *ships, int *len)
 {
     for(int i=0; i< *len; i++)
