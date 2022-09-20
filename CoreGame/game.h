@@ -1,3 +1,4 @@
+#define white (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED)
 
 typedef struct cell
 {
