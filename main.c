@@ -15,7 +15,6 @@ int main(void)
     // menu();
     srand(time(NULL));
     //Board and game Init works fine with SxS given board sizes, 
-    //  preferably use s<100 as I left 3. spaces extra for big numbers on the table on the Y axis (Rows)
     gameInit( &x,&y, &gamemode);
     return 0;
 }
