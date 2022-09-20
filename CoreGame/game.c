@@ -93,8 +93,6 @@ void gameInit(int *userX, int *userY, short *game_mode)
     initialize_ships_list(usr_ships, &total_ships_usr);
     register_ships(total_pertype_usr, CB_usr, usr_ships, board_usr);
 
-
-
     // PC INIT
     char board_pc[Rows][Columns];
     boardInt(board_pc, &Columns, &Rows);
@@ -118,10 +116,10 @@ void gameInit(int *userX, int *userY, short *game_mode)
 void boardInt(char (*board)[Columns], int *x, int *y)
 {
     // Rows (Vertical)
-    for(int i=0; i<(*y); i++)
+    for(int i=0; i<(Rows); i++)
     {
         // Columns (Horizontal)
-        for(int j=0; j<(*x); j++)
+        for(int j=0; j<(Columns); j++)
         {
             *(*(board+i)+j)=' ';
         }
@@ -131,7 +129,7 @@ void boardInt(char (*board)[Columns], int *x, int *y)
 // Define the number and type of ships
 void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *x, int *y , int *ships_per_type)
 {
-    int cells_for_ships= ((*x) * (*y)) *.3;
+    int cells_for_ships= ((Rows) * (Columns)) *.3;
     printf("Total of cells for ships %d\n", cells_for_ships);
 
     // Types of ships
@@ -493,30 +491,31 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
     for(int k=0; k<(Columns); k++)
     {
         SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN );
-        printf("| %d ", k);
+        printf("|%3.d", k);
     }
     printf("|\n");
 
     SetConsoleTextAttribute(hConsole, saved_attributes);
     // InterLines
-    printf("-------");
+    printf("------");
     for(int k=0; k<(Columns); k++)
     {
-        printf("-----");
+        printf("----");
     }
-    printf("\n");
+    printf("-\n");
 
 
     // Move through Lines (Vertical)
     for(int i=0; i<(Rows); i++)
     {
         SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN);
-        printf("| %d   ", i);
+        printf("| %3.d ", i);
         SetConsoleTextAttribute(hConsole, saved_attributes);
         // Columns (Horizontal)
-        for(int j=0; j<(*x); j++)
+        for(int j=0; j<(Columns); j++)
         {
             printf("|");
+
             switch (*(*(board+i)+j))
             {
             case 'A':
@@ -543,18 +542,18 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
             default:
                 break;
             }
-           printf(" %c ", *(*(board+i)+j));
-           SetConsoleTextAttribute(hConsole, saved_attributes);
+            printf(" %c ", *(*(board+i)+j));
+            SetConsoleTextAttribute(hConsole, saved_attributes);
         }
         printf("|\n");
 
         // InterLines
-        printf("-------");
-        for(int k=0; k<(*x)-1; k++)
+        printf("------");
+        for(int l=0; l<(Columns); l++)
         {
-            printf("-----");
+            printf("----");
         }
-        printf("\n");
+        printf("-\n");
     }
 
 
@@ -579,25 +578,25 @@ void didacticBoard(char (*board)[Columns])
     for(int k=0; k<(Columns); k++)
     {
         SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN );
-        printf("| %d ", k);
+        printf("|%3.d", k);
     }
     printf("|\n");
 
     SetConsoleTextAttribute(hConsole, saved_attributes);
     // InterLines
-    printf("-------");
+    printf("------");
     for(int k=0; k<(Columns); k++)
     {
-        printf("-----");
+        printf("----");
     }
-    printf("\n");
+    printf("-\n");
 
 
     // Move through Lines (Vertical)
     for(int i=0; i<(Rows); i++)
     {
         SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
-        printf("| %d   ", i);
+        printf("| %3.d ", i);
         SetConsoleTextAttribute(hConsole, saved_attributes);
         // Columns (Horizontal)
         for(int j=0; j<(Columns); j++)
@@ -622,12 +621,12 @@ void didacticBoard(char (*board)[Columns])
         printf("|\n");
 
         // InterLines
-        printf("-------");
-        for(int k=0; k<(Columns)-1; k++)
+        printf("------");
+        for(int k=0; k<(Columns); k++)
         {
-            printf("-----");
+            printf("----");
         }
-        printf("\n");
+        printf("-\n");
     }
 }
 
@@ -660,13 +659,13 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
     int win_usr=0, win_pc=0;
     short turno=rand()%2;
 
-    while((win_usr && win_pc) == 0)
+    while(win_usr == 0 && win_pc == 0)
     {
 
         if(turno==0){
             //Turno del jugador
             int x_usr=0, y_usr=0, attack_failed=0;
-            while((attack_failed && win_usr && win_pc) == 0)
+            while(attack_failed ==0  && win_usr==0 && win_pc ==0)
             {
 
                 system("cls");
@@ -731,7 +730,9 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 win_usr=verify_win(pc_ships, pc_len);
                 if(win_usr)
                 {
-                    printf("¡¡Jugador gana!!\n");
+
+                    printf("\n¡¡Jugador gana!!\n");
+                    Sleep(4000);
                     break;
                 }
             }
@@ -740,7 +741,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
             //Turno de PC
             int pc_x=0, pc_y=0; 
             int attack_failed=0;
-            while((attack_failed && win_usr && win_pc) == 0)
+            while(attack_failed ==0  && win_usr==0 && win_pc ==0)
             {
                 //Random cell to attack
                 pc_x=rand()%Columns; pc_y=rand()%Rows;
@@ -800,7 +801,8 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 win_pc=verify_win(usr_ships, usr_len);
                 if(win_pc)
                 {
-                    printf("¡¡Computadora gana!!\n");
+                    printf("\n¡¡Computadora gana!!\n");
+                    Sleep(4000);
                     break;
                 }
             }
