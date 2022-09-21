@@ -44,11 +44,11 @@ typedef struct ship{
 
 void gameInit(int *, int *, short *);
 
-void boardInt(char (*)[], int *, int *);
+void boardInt(char (*)[Columns]);
 
-void drawBoard(char (*)[], int *, int *, short);
+void drawBoard(char (*)[Columns], short);
 
-void shipsInit(char (*)[Columns], cell (*)[], int *, int *, int *);
+void shipsInit(char (*)[Columns], cell (*)[], int *);
 
 void gameloop (char (*)[Columns],ship *, cell (*)[Columns], char (*)[Columns] , ship *, cell (*)[Columns]);
 
@@ -69,23 +69,16 @@ void print_ships(ship *ships, int *len);
 
 void gameInit(int *userX, int *userY, short *game_mode)
 {
-
-    if(*userX && *userY != 0)
-    {
-        Rows=*userY;
-        Columns=*userX;
-    }
-
     // USER INIT
     char board_usr[Rows][Columns];
-    boardInt(board_usr, &Columns, &Rows);
+    boardInt(board_usr);
 
     // Bidimensional array of strructs with the info of each cell
     cell CB_usr[Rows][Columns];
     initialice_cells_list(CB_usr);
 
     int total_pertype_usr[5], total_ships_usr=0;
-    shipsInit(board_usr, CB_usr, &Columns, &Rows, total_pertype_usr);
+    shipsInit(board_usr, CB_usr, total_pertype_usr);
     total_ships_usr=*(total_pertype_usr) + *(total_pertype_usr+1) + *(total_pertype_usr+2) + *(total_pertype_usr+3) + *(total_pertype_usr+4);
         
     ship usr_ships[total_ships_usr];
@@ -95,14 +88,14 @@ void gameInit(int *userX, int *userY, short *game_mode)
 
     // PC INIT
     char board_pc[Rows][Columns];
-    boardInt(board_pc, &Columns, &Rows);
+    boardInt(board_pc);
 
     // Bidimensional array of strructs with the info of each cell
     cell CB_pc[Rows][Columns];
     initialice_cells_list(CB_pc);
 
     int total_pertype_pc[5], total_ships_pc=0;
-    shipsInit(board_pc, CB_pc, &Columns, &Rows, total_pertype_pc);
+    shipsInit(board_pc, CB_pc, total_pertype_pc);
     total_ships_pc=*(total_pertype_pc) + *(total_pertype_pc+1) + *(total_pertype_pc+2) + *(total_pertype_pc+3) + *(total_pertype_pc+4);
     
     ship pc_ships[total_ships_pc];
@@ -113,7 +106,7 @@ void gameInit(int *userX, int *userY, short *game_mode)
 }
 
 // Fill trash data with ' ' space character
-void boardInt(char (*board)[Columns], int *x, int *y)
+void boardInt(char (*board)[Columns])
 {
     // Rows (Vertical)
     for(int i=0; i<(Rows); i++)
@@ -127,11 +120,9 @@ void boardInt(char (*board)[Columns], int *x, int *y)
 }
 
 // Define the number and type of ships
-void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *x, int *y , int *ships_per_type)
+void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *ships_per_type)
 {
     int cells_for_ships= ((Rows) * (Columns)) *.3;
-    printf("Total of cells for ships %d\n", cells_for_ships);
-
     // Types of ships
             // Aircraft carrier (AC), Vessel (VS), Submarine(SM), Cruise (CR), Boat (BT)
     int temp=cells_for_ships+1;
@@ -158,34 +149,19 @@ void shipsInit(char (*board)[Columns],  cell (*CB)[Columns] ,int *x, int *y , in
         (*(ships+i))-=restantcells;
     }
     int total_cells_used=*(ships) + *(ships+1) + *(ships+2) + *(ships+3) + *(ships+4);
-
-    printf("Before compensation\n");
-    total_per_type(ships, types_sizes, ships_per_type); 
-    for(int i=0; i<5; i++)
-    {
-        printf("%d -- %d\n", (5-i), *(ships_per_type+i));
-    }
-
     
     // Compensate if more than 5 percent of the cells are not assigned
     float percent5=(float)cells_for_ships * (.05), remanant=cells_for_ships-total_cells_used ;
-    printf("5 percent: %f\n Restante: %f\n", percent5, remanant);
     while ((remanant) > percent5)
     {
         // Compensate with adding more boats
         total_cells_used=*(ships) + *(ships+1) + *(ships+2) + *(ships+3) + *(ships+4);
         remanant=cells_for_ships-total_cells_used;
-        printf("Adding BOAT\n");
         *(ships+4)+=1;
     }
 
     // TOTAL OF SHIPS PER TYPE
-    printf("After compensation\n");
     total_per_type(ships, types_sizes, ships_per_type);
-    for(int i=0; i<5; i++)
-    {
-        printf("%d -- %d\n", (5-i), *(ships_per_type+i));
-    }
 }
 
 // Create ships on the board and link with cells
@@ -470,9 +446,8 @@ void total_per_type(int *amt_ships, int *ships_size, int *total_pertype)
         *(total_pertype+i)=*(amt_ships+i) / *(ships_size+i);
     }
 }
-
 //Tableros completos
-void drawBoard(char (*board)[Columns], int *x, int *y, short turno)
+void drawBoard(char (*board)[Columns], short PC_USR)
 {
     // Menejo de colores de la consola
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -483,14 +458,14 @@ void drawBoard(char (*board)[Columns], int *x, int *y, short turno)
     GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
     saved_attributes = consoleInfo.wAttributes;
 
-    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | white );
-    printf("  TABLERO: ");
-    /*if(turno == 0){
+    if(PC_USR == 0){
+        SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | white );
         printf("  TABLERO: JUGADOR  ");
     }
-    else if(turno == 1){
+    else if(PC_USR == 1){
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | white );
         printf("  TABLERO: COMPUTADORA  ");  
-    }*/
+    }
     SetConsoleTextAttribute(hConsole, saved_attributes);
 
     // Upper char A-J guide points
@@ -565,7 +540,6 @@ void drawBoard(char (*board)[Columns], int *x, int *y, short turno)
 
 
 }
-
 //Tablero sin barcos
 void didacticBoard(char (*board)[Columns])
 {
@@ -637,7 +611,7 @@ void didacticBoard(char (*board)[Columns])
         printf("-\n");
     }
 }
-
+// Inicializar la estructura con los datos de cada celda
 void initialice_cells_list(cell (*CB)[Columns])
 {
     for(int rows=0; rows<Rows; rows++)
@@ -650,7 +624,7 @@ void initialice_cells_list(cell (*CB)[Columns])
         }
     }
 }
-
+// Inicializar la lists de barcos y sus datos
 void initialize_ships_list(ship *ships, int *len)
 {
     for(int i=0; i<*len; i++)
@@ -660,7 +634,19 @@ void initialize_ships_list(ship *ships, int *len)
         (ships+i)->orientation='0';
     }
 }
-
+//Prints the boards depending on the gamemode
+void gamemode_print(char (*board_1)[Columns], char (*board_2)[Columns], short *gamemode)
+{
+    system("cls");
+    drawBoard(board_1, 0);
+    if(*gamemode==1){
+        drawBoard(board_2, 1);
+    }
+    else if(*gamemode==2){
+        didacticBoard(board_2);
+    }
+}
+// Logica del juego y ciclo principal del mismo
 void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len)
 {
     
@@ -676,14 +662,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
             while(attack_failed ==0  && win_usr==0 && win_pc ==0)
             {
 
-                system("cls");
-                drawBoard(player, &Columns, &Rows, turno);
-                if(*gamemode==1){
-                    drawBoard(pc, &Columns, &Rows, turno);
-                }
-                else if(*gamemode==2){
-                    didacticBoard(pc);
-                }
+                gamemode_print(player, pc, gamemode);
                 printf("Turno: Jugador\n");
                 printf("\nIngresa tus cordenadas para disparar x,y (separadas por coma)\n");
                 scanf("%d,%d", &x_usr, &y_usr);
@@ -693,7 +672,6 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 {
                     if((*(pc_cells+y_usr)+x_usr)->hit==0)
                     {
-                        system("cls");
                         //Mark Cell as hit
                         (*(pc_cells+y_usr)+x_usr)->hit=1;
                         //Draw in the board the hit on the cell
@@ -701,13 +679,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                         //Register the hit on the boat struct
                         int id=(*(pc_cells+y_usr)+x_usr)->ship_id;
                         (pc_ships+(id-1))->sunk +=1;
-                        drawBoard(player, &Columns, &Rows, turno);
-                        if(*gamemode==1){
-                            drawBoard(pc, &Columns, &Rows, turno);
-                        }
-                        else if(*gamemode==2){
-                            didacticBoard(pc);
-                        }
+                        gamemode_print(player, pc, gamemode);
                         printf("Turno: Jugador\n");
                         printf("Impacto en (%d,%d)\n", x_usr, y_usr);
                         Sleep(4000);
@@ -724,14 +696,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 {
                     *(*(pc+y_usr)+x_usr)=2;
                     (*(pc_cells+y_usr)+x_usr)->hit=1;
-                    system("cls");
-                    drawBoard(player, &Columns, &Rows, turno);
-                    if(*gamemode==1){
-                        drawBoard(pc, &Columns, &Rows, turno);
-                    }
-                    else if(*gamemode==2){
-                        didacticBoard(pc);
-                    }
+                    gamemode_print(player, pc, gamemode);
                     printf("Turno: Jugador\n");
                     printf("No hay enemigo en la celda seleccionada\n");
                     turno=1;
@@ -769,7 +734,6 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 {
                     if((*(usr_cells+pc_y)+pc_x)->hit==0)
                     {
-                        system("cls");
                         //Mark Cell as hit
                         (*(usr_cells+pc_y)+pc_x)->hit=1;
                         //Draw in the board the hit on the cell
@@ -777,13 +741,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                         //Register the hit on the boat struct
                         int id=(*(usr_cells+pc_y)+pc_x)->ship_id;
                         (usr_ships+(id-1))->sunk +=1;
-                        drawBoard(player, &Columns, &Rows, turno);
-                        if(*gamemode==1){
-                            drawBoard(pc, &Columns, &Rows, turno);
-                        }
-                        else if(*gamemode==2){
-                            didacticBoard(pc);
-                        }
+                        gamemode_print(player, pc, gamemode);
                         printf("Turno: Computadora\n");
                         printf("Impacto de la coputadora en (%d,%d)\n", pc_x, pc_y);
                         Sleep(4000);
@@ -796,16 +754,9 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 }
                 else if((*(usr_cells+pc_y)+pc_x)->cell_state==0)
                 {
-                    system("cls");
                     *(*(player+pc_y)+pc_x)=2;
                     (*(usr_cells+pc_y)+pc_x)->hit=1;
-                    drawBoard(player, &Columns, &Rows, turno);
-                    if(*gamemode==1){
-                        drawBoard(pc, &Columns, &Rows, turno);
-                    }
-                    else if(*gamemode==2){
-                        didacticBoard(pc);
-                    }
+                    gamemode_print(player, pc, gamemode);
                     printf("Turno: Computadora\n");
                     printf("La computadora fallo\n");
                     Sleep(4000);
@@ -827,8 +778,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
         }
     }
 }
-
-
+// Verificar si los datos dados significan que alguien gano
 int verify_win(ship *ships, int *ships_len)
 {
     int sunk_total=0;
@@ -852,14 +802,6 @@ int verify_win(ship *ships, int *ships_len)
     
 }
 
-void enter_continue()
-{
-    printf("\nPresiona enter para continuar..");
-    getchar(); 
-}
-
-
-
 // Funciones para verificar el contenido de las estructuras -DEV TESTING
 void print_ships(ship *ships, int *len)
 {
@@ -871,7 +813,6 @@ void print_ships(ship *ships, int *len)
         printf("\tType : %d\n", (ships+i)->ship_type);
     }
 }
-
 void print_cells(cell (*cells)[Columns])
 {
     for(int row=0; row<Rows; row++)
@@ -885,4 +826,3 @@ void print_cells(cell (*cells)[Columns])
     }
 }
 
-//TEST 2 

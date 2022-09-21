@@ -66,7 +66,24 @@ void menu()
             case 'C':
                 system("cls");
                 print_logo();
-                printf("\nBienvenido a battleship\nCargando el juego...\n");
+                printf("\nBienvenido a battleship\n");
+                if(x==0 && y==0)
+                {
+                    x= 10;
+                    y=10;
+                }
+                printf("Configuracion: \n\t");
+                printf("DImensiones-> %d x %d\n\t", x,y);
+                printf("Modo de juego-> ");
+                if(gamemode==1)
+                {
+                    printf(" Didactico\n\t");
+                }
+                else if(gamemode == 2)
+                {
+                    printf(" Facil\n\n");
+                }
+                printf("\nCargando el juego...\n");
                 Sleep(4000);
                 gameInit(&x,&y,&gamemode);
                 break;
