@@ -46,7 +46,7 @@ void gameInit(int *, int *, short *);
 
 void boardInt(char (*)[], int *, int *);
 
-void drawBoard(char (*)[], int *, int *);
+void drawBoard(char (*)[], int *, int *, short);
 
 void shipsInit(char (*)[Columns], cell (*)[], int *, int *, int *);
 
@@ -471,7 +471,8 @@ void total_per_type(int *amt_ships, int *ships_size, int *total_pertype)
     }
 }
 
-void drawBoard(char (*board)[Columns], int *x, int *y)
+//Tableros completos
+void drawBoard(char (*board)[Columns], int *x, int *y, short turno)
 {
     // Menejo de colores de la consola
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -483,7 +484,13 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
     saved_attributes = consoleInfo.wAttributes;
 
     SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | white );
-    printf("  TABLERO: JUGADOR  ");
+    printf("  TABLERO: ");
+    /*if(turno == 0){
+        printf("  TABLERO: JUGADOR  ");
+    }
+    else if(turno == 1){
+        printf("  TABLERO: COMPUTADORA  ");  
+    }*/
     SetConsoleTextAttribute(hConsole, saved_attributes);
 
     // Upper char A-J guide points
@@ -559,6 +566,7 @@ void drawBoard(char (*board)[Columns], int *x, int *y)
 
 }
 
+//Tablero sin barcos
 void didacticBoard(char (*board)[Columns])
 {
     // Menejo de colores de la consola
@@ -669,9 +677,11 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
             {
 
                 system("cls");
-                drawBoard(player, &Columns, &Rows);
-                if(*gamemode==1)
-                {
+                drawBoard(player, &Columns, &Rows, turno);
+                if(*gamemode==1){
+                    drawBoard(pc, &Columns, &Rows, turno);
+                }
+                else if(*gamemode==2){
                     didacticBoard(pc);
                 }
                 printf("Turno: Jugador\n");
@@ -691,9 +701,11 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                         //Register the hit on the boat struct
                         int id=(*(pc_cells+y_usr)+x_usr)->ship_id;
                         (pc_ships+(id-1))->sunk +=1;
-                        drawBoard(player, &Columns, &Rows);
-                        if(*gamemode==1)
-                        {
+                        drawBoard(player, &Columns, &Rows, turno);
+                        if(*gamemode==1){
+                            drawBoard(pc, &Columns, &Rows, turno);
+                        }
+                        else if(*gamemode==2){
                             didacticBoard(pc);
                         }
                         printf("Turno: Jugador\n");
@@ -713,9 +725,11 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                     *(*(pc+y_usr)+x_usr)=2;
                     (*(pc_cells+y_usr)+x_usr)->hit=1;
                     system("cls");
-                    drawBoard(player, &Columns, &Rows);
-                    if(*gamemode==1)
-                    {
+                    drawBoard(player, &Columns, &Rows, turno);
+                    if(*gamemode==1){
+                        drawBoard(pc, &Columns, &Rows, turno);
+                    }
+                    else if(*gamemode==2){
                         didacticBoard(pc);
                     }
                     printf("Turno: Jugador\n");
@@ -763,9 +777,11 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                         //Register the hit on the boat struct
                         int id=(*(usr_cells+pc_y)+pc_x)->ship_id;
                         (usr_ships+(id-1))->sunk +=1;
-                        drawBoard(player, &Columns, &Rows);
-                        if(*gamemode==1)
-                        {
+                        drawBoard(player, &Columns, &Rows, turno);
+                        if(*gamemode==1){
+                            drawBoard(pc, &Columns, &Rows, turno);
+                        }
+                        else if(*gamemode==2){
                             didacticBoard(pc);
                         }
                         printf("Turno: Computadora\n");
@@ -783,9 +799,11 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                     system("cls");
                     *(*(player+pc_y)+pc_x)=2;
                     (*(usr_cells+pc_y)+pc_x)->hit=1;
-                    drawBoard(player, &Columns, &Rows);
-                    if(*gamemode==1)
-                    {
+                    drawBoard(player, &Columns, &Rows, turno);
+                    if(*gamemode==1){
+                        drawBoard(pc, &Columns, &Rows, turno);
+                    }
+                    else if(*gamemode==2){
                         didacticBoard(pc);
                     }
                     printf("Turno: Computadora\n");
