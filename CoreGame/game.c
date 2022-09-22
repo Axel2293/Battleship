@@ -42,31 +42,23 @@ typedef struct ship{
     int ID;
 }ship;
 
+// Prototypes of functions
 void gameInit(int *, int *, short *);
-
 void boardInt(char (*)[Columns]);
-
 void drawBoard(char (*)[Columns], short);
-
 void shipsQuantity(char (*)[Columns], cell (*)[], int *);
-
 void gameloop (char (*)[Columns],ship *, cell (*)[Columns], char (*)[Columns] , ship *, cell (*)[Columns]);
-
 void register_ships(int *, cell (*)[], ship *, char (*)[Columns]);
-
 int total_amount_ships(int *, int *);
-
 void cellsInit(cell (*CB)[Columns]);
 void shipsInit(ship *ships, int *);
-
 void total_per_type(int *amt_ships, int *ships_size, int *total_pertype);
-
 void gameLoop(short *, char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len);
 int verify_win(ship *, int *);
 void enter_continue();
-
 void print_ships(ship *ships, int *len);
 
+// Creates needed structs and matrix boards, also starts the game
 void gameInit(int *userX, int *userY, short *game_mode)
 {
     // USER INIT
@@ -103,7 +95,6 @@ void gameInit(int *userX, int *userY, short *game_mode)
     // Initialize game
     gameLoop(game_mode,board_usr, usr_ships, CB_usr, &total_ships_usr, board_pc, pc_ships, CB_pc, &total_ships_pc);
 }
-
 // Fill trash data with ' ' space character
 void boardInt(char (*board)[Columns])
 {
@@ -117,7 +108,6 @@ void boardInt(char (*board)[Columns])
         }
     }
 }
-
 // Define the number and type of ships
 void shipsQuantity(char (*board)[Columns],  cell (*CB)[Columns] ,int *ships_per_type)
 {
@@ -162,7 +152,6 @@ void shipsQuantity(char (*board)[Columns],  cell (*CB)[Columns] ,int *ships_per_
     // TOTAL OF SHIPS PER TYPE
     total_per_type(ships, types_sizes, ships_per_type);
 }
-
 // Create ships on the board and link with cells
 void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char (*board)[Columns])
 {
@@ -360,7 +349,6 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
         }
     }
 }
-
 // Total integer of ships
 int total_amount_ships(int *amt_ships, int *ships_size)
 {
@@ -371,7 +359,6 @@ int total_amount_ships(int *amt_ships, int *ships_size)
     }
     return total;
 }
-
 // Gives the total of ships per type
 void total_per_type(int *amt_ships, int *ships_size, int *total_pertype)
 {
