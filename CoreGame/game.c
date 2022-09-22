@@ -370,6 +370,7 @@ void registerName(char *shipName, const short *type)
         break;
     }
 }
+// Copy the secnd str on to the first str
 void str_cpy(char *ship_name, char *name)
 {
     for(int i=0; i<15; i++)
