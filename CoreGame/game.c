@@ -302,23 +302,23 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                             (*(CB+verf_y)+verf_x)->cell_state=1;
                             (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
                             *(*(board+verf_y)+verf_x)=*(types_names+type);
-                            if(direction==2 )
+                            switch (direction)
                             {
-                                verf_y--;                           
-                            }
-                            else if(direction==-2 )
-                            {
-                                verf_y++;
-                            }
-                            else if(direction==-1 )
-                            {
-                                verf_x--;
-                            }
-                            else if(direction==1 )
-                            {
-                                verf_x++;
-                            }
-                            
+                                case 2:
+                                    verf_y--;
+                                    break;
+                                case -2:
+                                    verf_y++;
+                                    break;    
+                                case -1:
+                                    verf_x--;
+                                    break;
+                                case 1:
+                                    verf_x++;
+                                    break;
+                                default:
+                                    break;
+                            }                   
                         }
                         ID_temp++;
                         (*(amt_ships+type))--;
