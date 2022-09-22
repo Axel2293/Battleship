@@ -601,6 +601,15 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 printf("\nIngresa tus cordenadas para disparar x,y (separadas por coma)\n");
                 scanf("%d,%d", &x_usr, &y_usr);
 
+                // Verify if selection is within the rows and columns values
+                while ((x_usr >= Columns || x_usr < 0) || (y_usr >= Rows || y_usr <0))
+                {
+                    printf("\nTus coordenadas salen del tablero :(\n");
+                    printf("Ingresa otras coordenadas:");
+                    scanf("%d,%d", &x_usr, &y_usr);
+                }
+                
+
                 // Verify if cell is occupied and mark a hit
                 if((*(pc_cells+y_usr)+x_usr)->cell_state==1)
                 {
@@ -619,6 +628,7 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                         Sleep(4000);
 
                     }
+                    // Already attacked that cell
                     else
                     {
                         printf("Turno: Jugador\n");
@@ -628,7 +638,9 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 }
                 else if((*(pc_cells+y_usr)+x_usr)->cell_state==0)
                 {
+                    // Draw board cell as happy face
                     *(*(pc+y_usr)+x_usr)=2;
+                    // Mark cell info as hit
                     (*(pc_cells+y_usr)+x_usr)->hit=1;
                     gamemode_print(player, pc, gamemode);
                     printf("Turno: Jugador\n");
@@ -643,14 +655,14 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                 win_usr=verify_win(pc_ships, pc_len);
                 if(win_usr)
                 {
-
                     printf("\n¡¡Jugador gana!!\n");
                     Sleep(4000);
                     break;
                 }
             }
         }
-        else if(turno==1){
+        else if(turno==1)
+        {
             //Turno de PC
             int pc_x=0, pc_y=0; 
             int attack_failed=0;
@@ -679,16 +691,13 @@ void gameLoop(short *gamemode, char (*player)[Columns],ship *usr_ships, cell (*u
                         printf("Turno: Computadora\n");
                         printf("Impacto de la coputadora en (%d,%d)\n", pc_x, pc_y);
                         Sleep(4000);
-
-                    }
-                    else
-                    {
-                        //printf("Ya atacaste esa coordenada\n");
                     }
                 }
                 else if((*(usr_cells+pc_y)+pc_x)->cell_state==0)
                 {
+                    // Draw board cell as happy face
                     *(*(player+pc_y)+pc_x)=2;
+                    // Mark cell info as hit
                     (*(usr_cells+pc_y)+pc_x)->hit=1;
                     gamemode_print(player, pc, gamemode);
                     printf("Turno: Computadora\n");
@@ -720,11 +729,13 @@ int verify_win(ship *ships, int *ships_len)
     //Verify win of u
     for(int i=0; i<*ships_len; i++)
     {
+        // Si la cantidad de golpes en el barco es igual a la longitud de su tipo, marcalo como hundido
         if((ships+i)->sunk == (ships+i)->ship_type)
         {
             sunk_total++;
         }
     }
+    // Si los barcos hundidos es igual a la cantidad de barcos totales alguien gano
     if (sunk_total== *ships_len)
     {
         return 1;
@@ -735,28 +746,3 @@ int verify_win(ship *ships, int *ships_len)
     }
     
 }
-
-// Funciones para verificar el contenido de las estructuras -DEV TESTING
-void print_ships(ship *ships, int *len)
-{
-    for(int i=0; i< *len; i++)
-    {
-        printf("ID : %d\n", (ships+i)->ID);
-        printf("\tOrientation : %c\n", (ships+i)->orientation);
-        printf("\tSunk : %d\n", (ships+i)->sunk);
-        printf("\tType : %d\n", (ships+i)->ship_type);
-    }
-}
-void print_cells(cell (*cells)[Columns])
-{
-    for(int row=0; row<Rows; row++)
-    {
-        for(int colm=0; colm<Columns; colm++)
-        {
-            printf("Cell: (%d, %d)\n", colm, row);
-            printf("\tCell state: %d\n", (*(cells+row)+colm)->cell_state);
-            printf("\tCell ship ID: %d\n", (*(cells+row)+colm)->ship_id);
-        }
-    }
-}
-
