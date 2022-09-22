@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <Windows.h>
 #include "CoreGame/game.h"
 
@@ -85,6 +86,7 @@ void menu()
                 }
                 printf("\nCargando el juego...\n");
                 Sleep(4000);
+                srand(time(NULL));
                 gameInit(&x,&y,&gamemode);
                 break;
             case 'D':

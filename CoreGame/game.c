@@ -1,21 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 #include <Windows.h>
 
 
 // Global vars for the board size
 int Rows=10;
 int Columns=10;
+// Global data 
 int types_sizes[5]={5,4,3,2,1};
 char types_names[5]={'A','V','S','C','B'};
-
-// Porcentage of ships ocupation in the board
-#define defaultSO 30
-
-// Default game mode : Didactico
-#define DF_GM 0
 
 // Colors
 #define white (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED)
@@ -31,9 +25,9 @@ typedef struct cell{
 
 typedef struct ship{
     //Name
-    char type_name[10];
+    char type_name[15];
     // Aircraft carrier (AC), Vessel (VS), Submarine(SM), Cruise (CR), Boat (BT)
-    char ship_type;
+    short ship_type;
     // Vertical or Horizontal
     char orientation;
     // Cells that got hit
@@ -49,14 +43,15 @@ void drawBoard(char (*)[Columns], short);
 void shipsQuantity(char (*)[Columns], cell (*)[], int *);
 void gameloop (char (*)[Columns],ship *, cell (*)[Columns], char (*)[Columns] , ship *, cell (*)[Columns]);
 void register_ships(int *, cell (*)[], ship *, char (*)[Columns]);
+void registerName(char *, const short *);
+void str_cpy(char *, char *);
 int total_amount_ships(int *, int *);
-void cellsInit(cell (*CB)[Columns]);
-void shipsInit(ship *ships, int *);
-void total_per_type(int *amt_ships, int *ships_size, int *total_pertype);
-void gameLoop(short *, char (*player)[Columns],ship *usr_ships, cell (*usr_cells)[Columns],int *usr_len, char (*pc)[Columns] , ship *pc_ships, cell (*pc_cells)[Columns], int *pc_len);
+void cellsInit(cell (*)[Columns]);
+void shipsInit(ship *, int *);
+void total_per_type(int *, int *, int *);
+void gameLoop(short *, char (*)[Columns],ship *, cell (*)[Columns],int *, char (*)[Columns] , ship *, cell (*)[Columns], int *);
 int verify_win(ship *, int *);
-void enter_continue();
-void print_ships(ship *ships, int *len);
+
 
 // Creates needed structs and matrix boards, also starts the game
 void gameInit(int *userX, int *userY, short *game_mode)
@@ -296,7 +291,8 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                             (ships_list+ship_list_pos)->orientation='H';
                         }
                         (ships_list+ship_list_pos)->ship_type=*(types_sizes+type);
-                        
+                        registerName((ships_list+ship_list_pos)->type_name, &(ships_list+ship_list_pos)->ship_type);
+
 
                         for(int i=0; i< (*(types_sizes+type)); i++){
                             (*(CB+verf_y)+verf_x)->cell_state=1;
@@ -334,6 +330,7 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                     (ships_list+ship_list_pos)->sunk= 0;
                     (ships_list+ship_list_pos)->orientation='B';
                     (ships_list+ship_list_pos)->ship_type=*(types_sizes+type);
+                    registerName((ships_list+ship_list_pos)->type_name, &(ships_list+ship_list_pos)->ship_type);
 
                     (*(CB+verf_y)+verf_x)->cell_state=1;
                     (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
@@ -347,6 +344,37 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                 }
             }
         }
+    }
+}
+// Registers the full name of the ship in the struct
+void registerName(char *shipName, const short *type)
+{   
+    switch ( *type)
+    {
+    case 5:
+        str_cpy(shipName, "Portaviones");
+        break;
+    case 4:
+        str_cpy(shipName, "Buque");
+        break;
+    case 3:
+        str_cpy(shipName, "Submarino");
+        break;
+    case 2:
+        str_cpy(shipName, "Crucero");
+        break;
+    case 1:
+        str_cpy(shipName, "Lancha");
+        break;
+    default:
+        break;
+    }
+}
+void str_cpy(char *ship_name, char *name)
+{
+    for(int i=0; i<15; i++)
+    {
+        *(ship_name+i)=*(name+i);
     }
 }
 // Total integer of ships
@@ -733,3 +761,4 @@ int verify_win(ship *ships, int *ships_len)
     }
     
 }
+
