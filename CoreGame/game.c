@@ -56,6 +56,13 @@ int verify_win(ship *, int *);
 // Creates needed structs and matrix boards, also starts the game
 void gameInit(int *userX, int *userY, short *game_mode)
 {
+
+    if(*userX!=0 && *userY!=0)
+    {
+        Rows=*userY;
+        Columns=*userX;
+    }
+
     // USER INIT
         // Board
     char board_usr[Rows][Columns];
@@ -280,6 +287,7 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
 
                     if(direction != 0)
                     {
+                        //Register data on the given direction depending on the type
                         (ships_list+ship_list_pos)->ID= ID_temp;
                         (ships_list+ship_list_pos)->sunk= 0;
                         if(direction==2 || direction==-2)
@@ -298,6 +306,7 @@ void register_ships(int *amt_ships, cell (*CB)[Columns], ship *ships_list, char 
                             (*(CB+verf_y)+verf_x)->cell_state=1;
                             (*(CB+verf_y)+verf_x)->ship_id=ID_temp;
                             *(*(board+verf_y)+verf_x)=*(types_names+type);
+                            // There are 4 types of directions, every one moves diferently on the board
                             switch (direction)
                             {
                                 case 2:
@@ -751,7 +760,7 @@ int verify_win(ship *ships, int *ships_len)
             sunk_total++;
         }
     }
-    // Si los barcos hundidos es igual a la cantidad de barcos totales alguien gano
+    // Si los barcos hundidos es igual a la cantidad de barcos totales entonces alguien gano
     if (sunk_total== *ships_len)
     {
         return 1;

@@ -68,11 +68,6 @@ void menu()
                 system("cls");
                 print_logo();
                 printf("\nBienvenido a battleship\n");
-                if(x==0 && y==0)
-                {
-                    x= 10;
-                    y=10;
-                }
                 printf("Configuracion: \n\t");
                 printf("DImensiones-> %d x %d\n\t", x,y);
                 printf("Modo de juego-> ");
