@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <Windows.h>
 #include "CoreGame/game.h"
 
 void print_logo();
@@ -15,22 +14,13 @@ int main(void)
 
 void print_logo()
 {   
-    // Menejo de colores de la consola
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-    WORD saved_attributes;
-
-    // Current atributes of color, etc..
-    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-    saved_attributes = consoleInfo.wAttributes;
-
-    SetConsoleTextAttribute(hConsole, white );
+    printf("\x1b[47;30m");
     printf("\t     ___       __  __  __        __   _        \n"
             "\t    / _ )___ _/ /_/ /_/ /__ ___ / /  (_)__     \n"
             "\t   / _  / _ `/ __/ __/ / -_|_-</ _ \\/ / _ \\    \n"
             "\t  /____/\\_,_/\\__/\\__/_/\\__/___/_//_/_/ .__/    \n"
             "\t                                    /_/        \n");
-    SetConsoleTextAttribute(hConsole, saved_attributes);
+    printf("\x1b[0m");
 }
 
 void menu()
@@ -41,12 +31,12 @@ void menu()
 
     while (loop)
     {   
-        system("cls");
+        system("clear");
         print_logo();
-        printf("\n\nA. Modificar dimension del tablero\n");
-        printf("B. Cambiar modo de juego\n");
-        printf("C. Iniciar juego \n");
-        printf("D. Salir \n");
+        printf("\n\n\x1b[37mA.\x1b[0m Modificar dimension del tablero\n");
+        printf("\x1b[37mB.\x1b[0m Cambiar modo de juego\n");
+        printf("\x1b[37mC.\x1b[0m Iniciar juego \n");
+        printf("\x1b[37mD.\x1b[0m Salir \n");
 
         char seleccion;
         scanf("%c", &seleccion);
@@ -65,7 +55,7 @@ void menu()
                 getchar();
                 break;
             case 'C':
-                system("cls");
+                system("clear");
                 print_logo();
                 printf("\nBienvenido a battleship\n");
                 printf("Configuracion: \n\t");
@@ -80,7 +70,6 @@ void menu()
                     printf(" Facil\n\n");
                 }
                 printf("\nCargando el juego...\n");
-                Sleep(4000);
                 srand(time(NULL));
                 gameInit(&x,&y,&gamemode);
                 break;
